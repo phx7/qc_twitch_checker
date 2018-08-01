@@ -7,6 +7,7 @@
 // @match        https://www.twitch.tv/*
 // @grant        GM_xmlhttpRequest
 // @require      http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js
+// @connect      api.twitch.tv
 // ==/UserScript==
 
 (function() {
