@@ -34,7 +34,7 @@
                 },
                 onload:     function (response) {
                     let streams = JSON.parse(response.responseText);
-                    let s = streams.data[Math.floor(Math.random() * 5)].thumbnail_url;
+                    let s = streams.data[Math.floor(Math.random() * 10)].thumbnail_url;
                     let name = s.match(/live_user_(.+)-{/)[1];
                     s = "https://www.twitch.tv/" + name;
                     console.info("Found " + name + "'s stream, loading page...");
