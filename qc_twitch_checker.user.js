@@ -13,7 +13,7 @@
     'use strict';
 
     // Your code here...
-    let debug = true;
+    let debug = false;
     let checkOffline = function (){
         let game = $('[data-a-target=stream-game-link]').text();
         let online = $('.player-streamstatus__label').text() == 'Live';
