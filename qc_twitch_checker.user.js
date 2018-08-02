@@ -19,6 +19,12 @@
         let game = $('[data-a-target=stream-game-link]').text();
         let online = $('.player-streamstatus__label').text() == 'Live';
         let drops = $('.drops-campaign-details__drops-success').text() == 'Drops enabled!';
+        // TODO:
+        // check if game is QC
+        // check if hosted
+        // check for "2000: Network error"
+        // if ($('.player-center-content').text == '2000: Network error')
+        // $('.player-button.qa-pause-play-button').click()
         if (debug) console.info('Game is "' + game + '", stream is ' + online + ' and drop status: ' + drops);
         if (game == "Quake Champions" && online && drops) {
             // do nothing
@@ -34,7 +40,7 @@
                 },
                 onload:     function (response) {
                     let streams = JSON.parse(response.responseText);
-                    let s = streams.data[Math.floor(Math.random() * 10)].thumbnail_url;
+                    let s = streams.data[Math.floor(Math.random() * 5)].thumbnail_url;
                     let name = s.match(/live_user_(.+)-{/)[1];
                     s = "https://www.twitch.tv/" + name;
                     console.info("Found " + name + "'s stream, loading page...");
