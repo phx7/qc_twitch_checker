@@ -16,21 +16,29 @@
     // Your code here...
     let debug = false;
     let checkOffline = function (){
-        let game = $('[data-a-target=stream-game-link]').text();
+        let game = $('[data-a-target=stream-game-link]').text() == "Quake Champions";
         let online = $('.player-streamstatus__label').text() == 'Live';
         let drops = $('.drops-campaign-details__drops-success').text() == 'Drops enabled!';
-        // TODO:
-        // check if game is QC
-        // check if hosted
-        // check for "2000: Network error"
-        // if ($('.player-center-content').text == '2000: Network error')
-        // $('.player-button.qa-pause-play-button').click()
+        let not_hosting = $('[data-a-target=hosting-ui-link]') == null;
+        let stream = $('[data-a-target=user-channel-header-item]').text();
+
         if (debug) console.info('Game is "' + game + '", stream is ' + online + ' and drop status: ' + drops);
-        if (game == "Quake Champions" && online && drops) {
+        // check for "2000: Network error"
+        if ($('.player-center-content').text == '2000: Network error') {
+            $('.player-button.qa-pause-play-button').click();
+        }
+        if (game && online && drops && not_hosting) {
             // do nothing
             return true;
         } else {
             if (debug) console.info('Looks like stream went offline. Searching for new stream.');
+            // put channel to localstorage if drops not enabled
+            let nodrops = [];
+            if (localStorage.getItem('nodrops') != null) nodrops = JSON.parse(localStorage.getItem('nodrops'));
+            if (!nodrops.includes(stream)) {
+                nodrops[nodrops.length] = stream;
+                localStorage.setItem('nodrops', JSON.stringify(nodrops));
+            }
             GM_xmlhttpRequest ( {
                 method:     "GET",
                 url:        "https://api.twitch.tv/helix/streams?game_id=496253",
@@ -40,7 +48,9 @@
                 },
                 onload:     function (response) {
                     let streams = JSON.parse(response.responseText);
-                    let s = streams.data[Math.floor(Math.random() * 5)].thumbnail_url;
+                    // TODO:
+                    // remove streams without drops (from localstorage)
+                    let s = streams.data[Math.floor(Math.random() * (streams.data.length-1))].thumbnail_url;
                     let name = s.match(/live_user_(.+)-{/)[1];
                     s = "https://www.twitch.tv/" + name;
                     console.info("Found " + name + "'s stream, loading page...");
@@ -52,6 +62,6 @@
 
     $(document).ready(function(){
         if (debug) console.info('Stream checker loaded');
-        setTimeout(setInterval(checkOffline, 2000), 10000);
+        setTimeout(setInterval(checkOffline, 4000), 10000);
     });
 })();
