@@ -110,12 +110,14 @@
                 }
             } );
         }
-        let stream = $('[data-a-target=user-channel-header-item]').text().replace("Verified", "");
-        if (stream.length > 0) {
-            getUserId(null, stream);
-        } else {
-            console.log('No stream name found, stopping');
-        }
+        setTimeout(function(){
+            let stream = $('[data-a-target=user-channel-header-item]').text().replace("Verified", "");
+            if (stream.length > 0) {
+                getUserId(null, stream);
+            } else {
+                console.log('No stream name found, stopping');
+            }
+        }, 5000);
     });
     // TODO: Add button to clear localstorage from non-drop streams. Now you can clear it by typing "localStorage.setItem('nodrops', JSON.stringify([]));" in browser console.
 })();
