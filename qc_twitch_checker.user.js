@@ -14,7 +14,7 @@
     'use strict';
 
     // Your code here...
-    let debug = true;
+    let debug = false;
     let redirect = function (user_id = null) {
         // get streamer login and redirect there
         GM_xmlhttpRequest ( {
