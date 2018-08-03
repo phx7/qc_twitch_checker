@@ -14,13 +14,31 @@
     'use strict';
 
     // Your code here...
-    let debug = false;
-    let checkOffline = function (){
+    let debug = true;
+    let redirect = function (user_id = null) {
+        // get streamer login and redirect there
+        GM_xmlhttpRequest ( {
+            method:     "GET",
+            url:        "https://api.twitch.tv/helix/users?id=" + user_id,
+            headers:    {
+                "Client-ID": "wq9v6tx81c3emlbw8vlfp7mq71tk2f",
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            onload:     function (response) {
+                response = JSON.parse(response.responseText);
+                let login = response.data[0].login;
+                let goto = "https://www.twitch.tv/" + login;
+                console.info("Found " + name + "'s stream, loading page...");
+                window.location.replace(goto);
+            }
+        } );
+    }
+    let checkOffline = function (user_id = null){
         let game = $('[data-a-target=stream-game-link]').text() == "Quake Champions";
         let online = $('.player-streamstatus__label').text() == 'Live';
         let drops = $('.drops-campaign-details__drops-success').text() == 'Drops enabled!';
         let not_hosting = !($('[data-a-target=hosting-ui-link]').length > 0);
-        let stream = $('[data-a-target=user-channel-header-item]').text();
+        let nodrops = [];
 
         if (debug) console.info('Game is "' + game + '", online: ' + online + ', drops: ' + drops + ', not_hosting: ' + not_hosting);
         // check for "2000: Network error"
@@ -34,16 +52,17 @@
             return true;
         } else {
             if (debug) console.info('Looks like stream went offline. Searching for new stream.');
-            // put channel to localstorage if drops not enabled
-            let nodrops = [];
-            if (localStorage.getItem('nodrops') != null) nodrops = JSON.parse(localStorage.getItem('nodrops'));
-            if (!nodrops.includes(stream)) {
-                nodrops[nodrops.length] = stream;
-                localStorage.setItem('nodrops', JSON.stringify(nodrops));
+            // put channel to localstorage if drops not enabled\
+            if (game && online == true && drops == false && not_hosting == true) {
+                if (localStorage.getItem('nodrops') != null) nodrops = JSON.parse(localStorage.getItem('nodrops'));
+                if (!nodrops.includes(user_id)) {
+                    nodrops[nodrops.length] = user_id;
+                    localStorage.setItem('nodrops', JSON.stringify(nodrops));
+                }
             }
             GM_xmlhttpRequest ( {
                 method:     "GET",
-                url:        "https://api.twitch.tv/helix/streams?game_id=496253",
+                url:        "https://api.twitch.tv/helix/streams?game_id=496253&first=100",
                 headers:    {
                     "Client-ID": "wq9v6tx81c3emlbw8vlfp7mq71tk2f",
                     "Content-Type": "application/x-www-form-urlencoded"
@@ -52,20 +71,14 @@
                     let streams = JSON.parse(response.responseText);
                     // remove streams without drops (from localstorage)
                     streams.data.forEach(function(item, index, object) {
-                        item.thumbnail_url = item.thumbnail_url.replace("Verified", "");
-                        let streamname = item.thumbnail_url.match(/live_user_(.+)-{/)[1];
-                        if (nodrops.includes(streamname)) {
+                        if (nodrops.includes(item.user_id) || item.user_id == user_id) {
                             object.splice(index, 1);
                             index += -1;
-                            if (debug) console.log("Removed " + streamname + " from streams list");
-                        }
+                            if (debug) console.log("Removed " + item.user_id + " from streams list");
+                        };
                     });
                     // pick random stream and redirect
-                    let s = streams.data[Math.floor(Math.random() * (streams.data.length-1))].thumbnail_url;
-                    let name = s.match(/live_user_(.+)-{/)[1];
-                    s = "https://www.twitch.tv/" + name;
-                    console.info("Found " + name + "'s stream, loading page...");
-                    window.location.replace(s);
+                    redirect(streams.data[Math.floor(Math.random() * (streams.data.length-1))].user_id);
                 }
             } );
         };
@@ -73,9 +86,30 @@
 
     $(document).ready(function(){
         if (debug) console.info('Stream checker loaded');
-        setTimeout(function (){
-            checkOffline();
-            setInterval(checkOffline, 30000);
-        }, 3000);
+        let getUserId = function(id = null, login = null) {
+            GM_xmlhttpRequest ( {
+                method:     "GET",
+                url:        "https://api.twitch.tv/helix/users?login=" + login,
+                headers:    {
+                    "Client-ID": "wq9v6tx81c3emlbw8vlfp7mq71tk2f",
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                onload:     function (response) {
+                    response = JSON.parse(response.responseText);
+                    // if user exists
+                    if (response.data.length > 0) {
+                        let user_id = response.data[0].id;
+                        setTimeout(function (){
+                            setInterval(checkOffline(user_id), 30000);
+                        }, 3000);
+                    } else {
+                        console.log('User_id for ' + login + ' not found, stopping');
+                    }
+                }
+            } );
+        }
+        let stream = $('[data-a-target=user-channel-header-item]').text().replace("Verified", "");
+        getUserId(null, stream);
     });
+    // TODO: Add button to clear localstorage from non-drop streams. Now you can clear it by typing "localStorage.setItem('nodrops', JSON.stringify([]));" in browser console.
 })();
