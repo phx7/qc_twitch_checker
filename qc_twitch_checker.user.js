@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         QC twitch stream checker
 // @namespace    http://tampermonkey.net/
-// @version      0.1
+// @version      0.2
 // @description  hai
 // @author       @yolanda_becool
 // @match        https://www.twitch.tv/*
