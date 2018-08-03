@@ -19,16 +19,18 @@
         let game = $('[data-a-target=stream-game-link]').text() == "Quake Champions";
         let online = $('.player-streamstatus__label').text() == 'Live';
         let drops = $('.drops-campaign-details__drops-success').text() == 'Drops enabled!';
-        let not_hosting = $('[data-a-target=hosting-ui-link]') == null;
+        let not_hosting = !($('[data-a-target=hosting-ui-link]').length > 0);
         let stream = $('[data-a-target=user-channel-header-item]').text();
 
-        if (debug) console.info('Game is "' + game + '", stream is ' + online + ' and drop status: ' + drops);
+        if (debug) console.info('Game is "' + game + '", online: ' + online + ', drops: ' + drops + ', not_hosting: ' + not_hosting);
         // check for "2000: Network error"
         if ($('.player-center-content').text == '2000: Network error') {
+            if (debug) console.info('Fixing error 2000');
             $('.player-button.qa-pause-play-button').click();
         }
         if (game && online && drops && not_hosting) {
             // do nothing
+            if (debug) console.info('Drops enabled, nothing to do now');
             return true;
         } else {
             if (debug) console.info('Looks like stream went offline. Searching for new stream.');
@@ -48,8 +50,17 @@
                 },
                 onload:     function (response) {
                     let streams = JSON.parse(response.responseText);
-                    // TODO:
                     // remove streams without drops (from localstorage)
+                    streams.data.forEach(function(item, index, object) {
+                        item.thumbnail_url = item.thumbnail_url.replace("Verified", "");
+                        let streamname = item.thumbnail_url.match(/live_user_(.+)-{/)[1];
+                        if (nodrops.includes(streamname)) {
+                            object.splice(index, 1);
+                            index += -1;
+                            if (debug) console.log("Removed " + streamname + " from streams list");
+                        }
+                    });
+                    // pick random stream and redirect
                     let s = streams.data[Math.floor(Math.random() * (streams.data.length-1))].thumbnail_url;
                     let name = s.match(/live_user_(.+)-{/)[1];
                     s = "https://www.twitch.tv/" + name;
@@ -62,6 +73,9 @@
 
     $(document).ready(function(){
         if (debug) console.info('Stream checker loaded');
-        setTimeout(setInterval(checkOffline, 4000), 10000);
+        setTimeout(function (){
+            checkOffline();
+            setInterval(checkOffline, 30000);
+        }, 3000);
     });
 })();
