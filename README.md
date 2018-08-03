@@ -7,6 +7,7 @@ To use it follow these steps (I tested it in Firefox, you can try Chrome, but I 
 - Install this extension https://tampermonkey.net/
 - Go here https://github.com/phx7/qc_twitch_checker/raw/master/qc_twitch_checker.user.js and click "Install"
 - You're ready to go. Try opening my stream (https://www.twitch.tv/yolanda_becool, should be offline) or any other offline QC stream and wait a few seconds. If everything is ok it should redirect you to live QC stream with drops.
+- To disable script click extension button and click script name to switch it off (https://i.imgur.com/lXrAhTq.png)
 - Feel free to post any issues you encounter or features you may think of. But I can't promise I will have much time to fix it :]
 
 How script works now:
