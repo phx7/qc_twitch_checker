@@ -14,7 +14,7 @@
     'use strict';
 
     // Your code here...
-    let debug = false;
+    let debug = true;
     let redirect = function (user_id = null) {
         // get streamer login and redirect there
         GM_xmlhttpRequest ( {
@@ -87,6 +87,7 @@
     $(document).ready(function(){
         if (debug) console.info('Stream checker loaded');
         let getUserId = function(id = null, login = null) {
+            console.log("https://api.twitch.tv/helix/users?login=" + login);
             GM_xmlhttpRequest ( {
                 method:     "GET",
                 url:        "https://api.twitch.tv/helix/users?login=" + login,
@@ -100,6 +101,7 @@
                     if (response.data.length > 0) {
                         let user_id = response.data[0].id;
                         setTimeout(function (){
+                            checkOffline(user_id);
                             setInterval(checkOffline(user_id), 30000);
                         }, 3000);
                     } else {
@@ -109,7 +111,11 @@
             } );
         }
         let stream = $('[data-a-target=user-channel-header-item]').text().replace("Verified", "");
-        getUserId(null, stream);
+        if (stream.length > 0) {
+            getUserId(null, stream);
+        } else {
+            console.log('No stream name found, stopping');
+        }
     });
     // TODO: Add button to clear localstorage from non-drop streams. Now you can clear it by typing "localStorage.setItem('nodrops', JSON.stringify([]));" in browser console.
 })();
