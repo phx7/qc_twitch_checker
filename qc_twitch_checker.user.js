@@ -120,4 +120,5 @@
         }, 5000);
     });
     // TODO: Add button to clear localstorage from non-drop streams. Now you can clear it by typing "localStorage.setItem('nodrops', JSON.stringify([]));" in browser console.
+    // TODO: Check for logged in state and linked bethesda account
 })();
