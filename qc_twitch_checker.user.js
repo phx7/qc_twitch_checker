@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         QC twitch stream checker
 // @namespace    http://tampermonkey.net/
-// @version      0.2
+// @version      0.3
 // @description  hai
 // @author       @yolanda_becool
 // @match        https://www.twitch.tv/*
@@ -48,7 +48,7 @@
         }
         if (game && online && drops && not_hosting) {
             // do nothing
-            if (debug) console.info('Drops enabled, nothing to do now');
+            if (debug) console.info('Drops enabled, nothing to do now. Next check in 30 seconds.');
             return true;
         } else {
             if (debug) console.info('Looks like stream went offline. Searching for new stream.');
@@ -85,9 +85,8 @@
     }
 
     $(document).ready(function(){
-        if (debug) console.info('Stream checker loaded');
+        if (debug) console.info('Stream checker loaded. Starting stream checking in 5 seconds.');
         let getUserId = function(id = null, login = null) {
-            console.log("https://api.twitch.tv/helix/users?login=" + login);
             GM_xmlhttpRequest ( {
                 method:     "GET",
                 url:        "https://api.twitch.tv/helix/users?login=" + login,
@@ -100,10 +99,10 @@
                     // if user exists
                     if (response.data.length > 0) {
                         let user_id = response.data[0].id;
-                        setTimeout(function (){
-                            checkOffline(user_id);
-                            setInterval(checkOffline(user_id), 30000);
-                        }, 3000);
+                        checkOffline(user_id);
+                        setInterval(function(){
+                            checkOffline(user_id)
+                        }, 30000);
                     } else {
                         console.log('User_id for ' + login + ' not found, stopping');
                     }
