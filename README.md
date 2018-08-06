@@ -1,7 +1,7 @@
 # qc_twitch_checker
 Hello bois.
 
-I made a small tool to keep us watching QC streams and getting that favor SadKappa. It's lame, but it's working for me so you can try it too.
+I made a small tool to keep us watching QC streams and getting that favor SadKappa. It's not top notch coding quality, but it's working for me so you can try it too.
 
 To use it follow these steps (I tested it in Firefox, you can try Chrome, but I have no idea how will it work):
 - Install this extension https://tampermonkey.net/
@@ -12,7 +12,7 @@ To use it follow these steps (I tested it in Firefox, you can try Chrome, but I 
 - Feel free to post any issues you encounter or features you may think of. But I can't promise I will have much time to fix it :]
 
 How script works now:
-- It checks if stream is online, game is Quake Champions, drops are enabled and streamer not hosting anyone.
+- It checks if stream is online, game is Quake Champions, drops are enabled and streamer not hosting anyone (5 seconds after stream page loaded and every 30 seconds after).
 - When you get network 2000 error it automatically clicks Play to resume stream.
 - When it encounters live stream without drops it saves its User_ID to localStorage to avoid this stream later.
 - When it detects any condition to change stream (offline, hosting, disabled drops) it gets all online QC streams from twitch API and loads random stream excluding these that was previously found to have disabled drops (if you want to clear localStorage from saved streams without drops you can type *localStorage.setItem('nodrops', JSON.stringify([]));* in browser console, I maybe will add button for this later).
