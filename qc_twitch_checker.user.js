@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         QC twitch stream checker
 // @namespace    http://tampermonkey.net/
-// @version      0.4
+// @version      0.5
 // @description  hai
 // @author       @yolanda_becool
 // @match        https://www.twitch.tv/*
@@ -42,8 +42,8 @@
 
         if (debug) console.info('Game is "' + game + '", online: ' + online + ', drops: ' + drops + ', not_hosting: ' + not_hosting);
         // check for "2000: Network error"
-        if ($('.player-center-content').text == '2000: Network error') {
-            if (debug) console.info('Fixing error 2000');
+        if ($('.player-center-content').text() == '2000: Network error') {
+            console.info('Fixing error 2000');
             $('.player-button.qa-pause-play-button').click();
         }
         if (game && online && drops && not_hosting) {
