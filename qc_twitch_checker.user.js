@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         QC twitch stream checker
 // @namespace    http://tampermonkey.net/
-// @version      0.5
+// @version      0.6
 // @description  hai
 // @author       @yolanda_becool
 // @match        https://www.twitch.tv/*
@@ -36,7 +36,7 @@
     let checkOffline = function (user_id = null){
         let game = $('[data-a-target=stream-game-link]').text() == "Quake Champions";
         let online = $('.player-streamstatus__label').text() == 'Live';
-        let drops = $('.drops-campaign-details__drops-success').text() == 'Drops enabled!';
+        let drops = ($('.drops-campaign-details__drops-success').text() == 'Drops enabled!') || ($('.side-nav-channel-info-drops__icon'));
         let not_hosting = !($('[data-a-target=hosting-ui-link]').length > 0);
         let nodrops = [];
 
