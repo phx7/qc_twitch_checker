@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         QC twitch stream checker
 // @namespace    http://tampermonkey.net/
-// @version      0.6
+// @version      0.7
 // @description  hai
 // @author       @yolanda_becool
 // @match        https://www.twitch.tv/*
@@ -109,10 +109,11 @@
                 }
             } );
         }
-        setTimeout(function(){
-            let stream = $('.player-streaminfo__name .qa-display-name').text().replace("Verified", "");
-            if (stream.length > 0) {
-                getUserId(null, stream);
+        setTimeout(function() {
+            ////////////////// TODO: REDO THIS TO WINDOW.LOCATION.STUFF
+            let stream = window.location.pathname;
+            if (stream.match("^\/[^\/]+$")) {
+                getUserId(null, stream.replace('/', ''));
             } else {
                 console.log('No stream name found, stopping');
             }
