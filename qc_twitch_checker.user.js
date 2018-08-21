@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         QC twitch stream checker
 // @namespace    http://tampermonkey.net/
-// @version      0.8
+// @version      0.9
 // @description  hai
 // @author       @yolanda_becool
 // @match        https://www.twitch.tv/*
@@ -33,7 +33,30 @@
             }
         } );
     }
-    let checkOffline = function (user_id = null){
+    let gtfo = function (nodrops = null, user_id = null) {
+        GM_xmlhttpRequest ( {
+            method:     "GET",
+            url:        "https://api.twitch.tv/helix/streams?game_id=496253&first=100",
+            headers:    {
+                "Client-ID": "wq9v6tx81c3emlbw8vlfp7mq71tk2f",
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            onload:     function (response) {
+                let streams = JSON.parse(response.responseText);
+                // remove streams without drops (from localstorage)
+                streams.data.forEach(function(item, index, object) {
+                    if (nodrops.includes(item.user_id) || item.user_id == user_id) {
+                        object.splice(index, 1);
+                        index += -1;
+                        if (debug) console.log("Removed " + item.user_id + " from streams list");
+                    };
+                });
+                // pick random stream and redirect
+                redirect(streams.data[Math.floor(Math.random() * (streams.data.length-1))].user_id);
+            }
+        } );
+    }
+    let checkOffline = function (user_id = null) {
         let game = $('[data-a-target=stream-game-link]').text() == "Quake Champions";
         let online = $('.player-streamstatus__label').text() == 'Live';
         let drops = ($('.drops-campaign-details__drops-success').text() == 'Drops enabled!') || ($('.side-nav-channel-info-drops__icon').length);
@@ -54,33 +77,13 @@
             if (debug) console.info('Looks like stream went offline. Searching for new stream.');
             // put channel to localstorage if drops not enabled\
             if (game && online == true && drops == false && not_hosting == true) {
-                if (localStorage.getItem('nodrops') != null) nodrops = JSON.parse(localStorage.getItem('nodrops'));
+                if (localStorage.getItem('nodrops')) nodrops = JSON.parse(localStorage.getItem('nodrops'));
                 if (!nodrops.includes(user_id)) {
                     nodrops[nodrops.length] = user_id;
                     localStorage.setItem('nodrops', JSON.stringify(nodrops));
                 }
             }
-            GM_xmlhttpRequest ( {
-                method:     "GET",
-                url:        "https://api.twitch.tv/helix/streams?game_id=496253&first=100",
-                headers:    {
-                    "Client-ID": "wq9v6tx81c3emlbw8vlfp7mq71tk2f",
-                    "Content-Type": "application/x-www-form-urlencoded"
-                },
-                onload:     function (response) {
-                    let streams = JSON.parse(response.responseText);
-                    // remove streams without drops (from localstorage)
-                    streams.data.forEach(function(item, index, object) {
-                        if (nodrops.includes(item.user_id) || item.user_id == user_id) {
-                            object.splice(index, 1);
-                            index += -1;
-                            if (debug) console.log("Removed " + item.user_id + " from streams list");
-                        };
-                    });
-                    // pick random stream and redirect
-                    redirect(streams.data[Math.floor(Math.random() * (streams.data.length-1))].user_id);
-                }
-            } );
+            gtfo(nodrops, user_id);
         };
     }
 
@@ -115,6 +118,13 @@
             if (stream.match("^\/[^\/]+$")) {
                 getUserId(null, stream.replace('/', ''));
             } else {
+                if (stream.match("^\/videos\/[^\/]+$")) {
+                    let nodrops = [];
+                    if (localStorage.getItem('nodrops')) {
+                        nodrops = JSON.parse(localStorage.getItem('nodrops'));
+                    }
+                    gtfo(nodrops);
+                }
                 console.log('No stream name found, stopping');
             }
         }, 5000);
